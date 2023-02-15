@@ -1,0 +1,8 @@
+{
+  "name": "Live Captions Assistant",
+  "description": "Provides better desktop integration for Live Captions",
+  "uuid": "livecaptions@sapples.net",
+  "shell-version": [
+    "42"
+  ]
+}
