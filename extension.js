@@ -27,10 +27,11 @@ class Extension {
     updateKeepAbove(value) {
         const appSystem = Shell.AppSystem.get_default();
 
-        let app = appSystem.lookup_desktop_wmclass("livecaptions");
+        let app = appSystem.lookup_desktop_wmclass("livecaptions") ?? appSystem.lookup_desktop_wmclass("net.sapples.LiveCaptions");
         if(app === null){
             for(let a of appSystem.get_running()) {
-                if(a.get_windows()[0].wm_class === "livecaptions"){
+                const wmclass = a.get_windows()[0].wm_class.toLowerCase();;
+                if((wmclass === "livecaptions") || (wmclass === "net.sapples.livecaptions")){
                     app = a;
                     break;
                 }
@@ -38,7 +39,7 @@ class Extension {
         }
 
         if(app === null){
-            logError("Could not find livecaptions application");
+            log("Could not find livecaptions application");
             return;
         }
 
