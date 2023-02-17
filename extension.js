@@ -46,7 +46,13 @@ class Extension {
         const windows = app.get_windows();
 
         windows.forEach(window => {
-            if(value) window.make_above(); else window.unmake_above();
+            if(value) {
+                window.make_above();
+                window.stick();
+            } else {
+                window.unmake_above();
+                window.unstick();
+            }
         });
     }
 
