@@ -34,6 +34,10 @@ class Extension {
     }
 
     updateKeepAbove(value) {
+        this.disconnectPreviousWindowSignal();
+        this.windowUpdateCounter = this.windowUpdateCounter + 1;
+        const activeCount = this.windowUpdateCounter;
+
         const appSystem = Shell.AppSystem.get_default();
 
         let app = appSystem.lookup_desktop_wmclass("livecaptions") ?? appSystem.lookup_desktop_wmclass("net.sapples.LiveCaptions");
@@ -62,16 +66,7 @@ class Extension {
             }
         };
 
-        const windows = app.get_windows();
-
-        if(windows.length > 0) {
-            windows.forEach(windowUpdater);
-        }
-
-
-        this.disconnectPreviousWindowSignal();
-        this.windowUpdateCounter = this.windowUpdateCounter + 1;
-        const activeCount = this.windowUpdateCounter;
+        app.get_windows().forEach(windowUpdater);
 
         // Apply keep above to any new windows that appear too.
         // This is required in cases when this is called before the app
