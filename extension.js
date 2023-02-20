@@ -22,6 +22,15 @@ const { GLib, Gio, Shell } = imports.gi;
 
 class Extension {
     constructor() {
+        this.windowUpdateCounter = 0;
+    }
+
+    disconnectPreviousWindowSignal() {
+        if((this.prevApp !== null) && (this.prevWindowsChangedId !== -1)) {
+            this.prevApp.disconnect(this.prevWindowsChangedId);
+            this.prevApp = null;
+            this.prevWindowsChangedId = -1;
+        }
     }
 
     updateKeepAbove(value) {
@@ -43,9 +52,7 @@ class Extension {
             return;
         }
 
-        const windows = app.get_windows();
-
-        windows.forEach(window => {
+        const windowUpdater = (window) => {
             if(value) {
                 window.make_above();
                 window.stick();
@@ -53,7 +60,32 @@ class Extension {
                 window.unmake_above();
                 window.unstick();
             }
+        };
+
+        const windows = app.get_windows();
+
+        if(windows.length > 0) {
+            windows.forEach(windowUpdater);
+        }
+
+
+        this.disconnectPreviousWindowSignal();
+        this.windowUpdateCounter = this.windowUpdateCounter + 1;
+        const activeCount = this.windowUpdateCounter;
+
+        // Apply keep above to any new windows that appear too.
+        // This is required in cases when this is called before the app
+        // window has spawned
+        const windowsChangedId = app.connect('windows-changed', () => {
+            if(activeCount === this.windowUpdateCounter) {
+                app.get_windows().forEach(windowUpdater);
+            } else {
+                app.disconnect(windowsChangedId);
+            }
         });
+
+        this.prevApp = app;
+        this.prevWindowsChangedId = windowsChangedId;
     }
 
     subscribeToProperty(connection) {
@@ -127,6 +159,9 @@ class Extension {
     }
 
     enable() {
+        this.prevApp = null;
+        this.prevWindowsChangedId = -1;
+
         this.previousConnection = null;
         this.signalId = -1;
         this.busWatchId = Gio.bus_watch_name(
@@ -141,11 +176,13 @@ class Extension {
     disable() {
         Gio.bus_unwatch_name(this.busWatchId);
 
-        if((this.previousConnection !== null) && (this.signalId != -1)){
+        if((this.previousConnection !== null) && (this.signalId !== -1)){
             this.previousConnection.signal_unsubscribe(this.signalId);
             this.previousConnection = null;
             this.signalId = -1;
         }
+
+        this.disconnectPreviousWindowSignal();
     }
 }
 
