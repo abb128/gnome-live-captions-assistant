@@ -18,9 +18,11 @@
 
 /* exported init */
 
-const { GLib, Gio, Shell } = imports.gi;
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import Shell from 'gi://Shell';
 
-class Extension {
+export default class LiveCaptionsExtension {
     constructor() {
         this.windowUpdateCounter = 0;
     }
@@ -179,8 +181,4 @@ class Extension {
 
         this.disconnectPreviousWindowSignal();
     }
-}
-
-function init() {
-    return new Extension();
 }
