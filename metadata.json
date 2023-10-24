@@ -2,7 +2,7 @@
   "uuid": "livecaptions@sapples.net",
   "name": "Live Captions Assistant",
   "description": "Provides better desktop integration for Live Captions",
-  "version": 1,
+  "version": 3,
   "url": "https://github.com/abb128/gnome-live-captions-assistant",
   "shell-version": ["45"]
 }
